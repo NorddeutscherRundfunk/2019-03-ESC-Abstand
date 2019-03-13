@@ -3,7 +3,8 @@
 Hier finden sich alle Informationen zur Berechnung der Abstände zwischem dem Erst- und Zweitplatzierten beim ESC. Präsentiert werden die Ergebnisse im Artikel "Das sind die erfolgreichsten ESC-Hits". Auch die Daten sind in diesem Repository hinterlegt.
 
 # Hinweise
-Die Datenanalyse berücksichtigt alle Gewinner ab 1975. In diesem Jahr wurde das Zwölf-Punkte-System beim ESC eingeführt, welches sich vier Jahrzehnte hielt. Seit 2016 kann ein Land doppelt so viele Punkte vergeben. Um die Abstände zu ermitteln, wurde die maximale Punktzahl pro Show ermittelt. Die erreichten Punkte des Erst- sowie Zweitplatzierten wurden in Relation gesetzt zu der Maximalpunktzahl des jeweiligen Jahres. Der Abstand ist der absolute Unterschied zwischen diesen beiden relativen Werten.
+Die Datenanalyse berücksichtigt alle Gewinner ab 1975. In diesem Jahr wurde das Zwölf-Punkte-System beim ESC eingeführt, welches sich vier Jahrzehnte hielt. Seit 2016 kann ein Land doppelt so viele Punkte vergeben.
+Um die Abstände zu ermitteln, wurde die maximale Punktzahl pro Show ermittelt. Die erreichten Punkte des Erst- sowie Zweitplatzierten wurden in Relation gesetzt zu der Maximalpunktzahl des jeweiligen Jahres. Der Abstand ist der absolute Unterschied zwischen diesen beiden relativen Werten.
 
 # Analyse 
 Diese Packages und Versionen wurden in der Analyse verwendet:

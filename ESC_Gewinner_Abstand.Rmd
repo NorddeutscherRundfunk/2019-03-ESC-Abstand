@@ -1,0 +1,115 @@
+---
+title: "ESC: Abstände der Gewinner"
+output:
+  html_notebook:
+    toc: true
+    toc_float: true
+    number_sections: false
+  html_document: default
+---
+
+<style>
+  h1 { margin-top: 40px; }
+  h2 { font-size: 20px;	margin-top: 25px; margin-bottom: 5px;}
+  h3 { font-size: 16px;	margin-top: 25px; margin-bottom: 5px;}
+</style>
+
+```{r}
+library(needs)
+needs(tidyverse, dplyr)
+```
+
+```{r}
+esc_punkte <- read_csv("esc_history/esc_history_table_points.csv")
+```
+
+## Maximalpunktzahl pro Jahr
+
+```{r}
+max_1975_2015 <- esc_punkte %>%
+  filter(year %in% c(1975:2015)) %>% # 12 Punkte als Höchstpunktzahl
+  filter(mode == "FINAL") %>%
+  group_by(year) %>%
+  distinct(from_country_key) %>%
+  tally() %>%
+  rename(teilnehmer = n) %>% # Teilnehmende Länder
+  mutate(wahlberechtigte = teilnehmer - 1) %>% # Wahlberechtigte Länder: Ein Land kann nicht für sich selbst stimmen
+  mutate(erreichbare_punkte = wahlberechtigte * 12) %>%
+  select(year, wahlberechtigte, erreichbare_punkte)
+
+max_2016_2018 <- esc_punkte %>%
+  filter(year %in% c(2016:2018)) %>% # 24 Punkte als Höchstpunktzahl
+  filter(mode == "FINAL") %>%
+  group_by(year) %>%
+  distinct(from_country_key) %>%
+  tally() %>%
+  rename(teilnehmer = n) %>%
+  mutate(wahlberechtigte = teilnehmer - 1) %>%
+  mutate(erreichbare_punkte = wahlberechtigte * 24) %>%
+  select(year, wahlberechtigte, erreichbare_punkte)
+
+max_punkte <- bind_rows(max_1975_2015, max_2016_2018)
+```
+
+```{r}
+esc_finale <- read_csv("esc_history/esc_history_table_mainevent.csv")
+```
+
+## Erst- und Zweitplatzierte ab 1975
+
+```{r}
+erster_platz <- esc_finale %>%
+  filter(event == 3) %>%
+  filter(rank == 1) %>%
+  filter(year %in% c(1975:2018)) %>%
+  select(year, country, artist, title, points_total) %>%
+  rename(punkte_erstplatzierter = points_total) %>%
+  rename(sieger = artist) %>%
+  rename(gewinner_song = title)
+
+zweiter_platz <- esc_finale %>%
+  filter(event == 3) %>%
+  filter(rank == 2) %>%
+  filter(year %in% c(1975:2018)) %>%
+  select(year, country, artist, title, points_total) %>%
+  rename(punkte_zweitplatzierter = points_total) %>%
+  rename(zweitplatzierter = artist) %>%
+  rename(zweitbester_song = title)
+
+gewinner <- left_join(erster_platz, zweiter_platz, by = "year") # 1990: zwei Finalisten auf Platz zwei
+```
+
+## Abstände der Erstplatzierten
+
+```{r}
+gewinner_abstand <- left_join(max_punkte, gewinner, by = "year") %>%
+  mutate(anteil_maxpunktzahl_erster = round(punkte_erstplatzierter/erreichbare_punkte*100, 1)) %>%
+  mutate(anteil_maxpunktzahl_zweiter = round(punkte_zweitplatzierter/erreichbare_punkte*100, 1)) %>%
+  mutate(prozentpunkte_abstand = round(anteil_maxpunktzahl_erster - anteil_maxpunktzahl_zweiter, 1)) %>%
+  rename(jahr = year) %>%
+  select(prozentpunkte_abstand, sieger, gewinner_song, jahr, erreichbare_punkte, punkte_erstplatzierter, anteil_maxpunktzahl_erster, punkte_zweitplatzierter, anteil_maxpunktzahl_zweiter, zweitplatzierter, zweitbester_song) %>%
+  arrange(desc(prozentpunkte_abstand))
+```
+
+## Top 5: Größte Abstände
+
+```{r}
+top_5 <- gewinner_abstand %>%
+  arrange(desc(prozentpunkte_abstand)) %>%
+  head(5) %>%
+  select(prozentpunkte_abstand, sieger, jahr)
+
+write_csv(top_5, "gewinner_top_5.csv")
+```
+
+## Bottom 5: Knappste Siege
+
+```{r}
+bottom_5 <- gewinner_abstand %>%
+  #filter(prozentpunkte_abstand > 0) %>%
+  arrange(prozentpunkte_abstand) %>%
+  head(5) %>%
+  select(prozentpunkte_abstand, sieger, jahr)
+
+write_csv(bottom_5, "gewinner_bottom_5.csv")
+```
